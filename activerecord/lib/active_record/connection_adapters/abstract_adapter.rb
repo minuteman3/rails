@@ -1129,10 +1129,17 @@ module ActiveRecord
             connection:        self,
             transaction:       current_transaction.user_transaction.presence,
             row_count:         0,
+            **extra_notification_info(sql, name, binds),
             &block
           )
         rescue ActiveRecord::StatementInvalid => ex
           raise ex.set_query(sql, binds)
+        end
+
+        # Database adapters can override this method to
+        # provide extra data in the notification payload.
+        def extra_notification_info(sql, name, binds)
+          {}
         end
 
         def translate_exception(exception, message:, sql:, binds:)
